@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+
+import sys, os
+import logging
+import subprocess
+
+UNKNOWN = 0
+RUST = 1
+GO = 2
+
+# Update this if zig cc doesn't support specific args.
+BLACKLIST_ARGS = ['--target=', '-no_pie']
+
+def log(msg, *args, **kwargs):
+    if os.getenv('ZIGCC_LOG', '0') in ['true', '1']:
+        logging.info(msg, *args, **kwargs)
+
+def zig_target_from(target, lang):
+    if lang == RUST:
+        # Zig target has no vendor field
+        # i686-pc-windows-msvc --> i386-windows-gnu
+        [arch, vendor, os, abi] = target.split('-')
+        zig_arch = {
+            'i686': 'i386',
+        }.get(arch, arch)
+        return '-'.join([zig_arch, os, abi])
+    elif lang == GO:
+        [arch, os] = target.split('-', 2)
+        zig_arch = {
+           "386": "x86",
+           "amd64": "x86_64",
+           "arm64": "aarch64",
+        }.get(arch, arch)
+        zig_os = {
+            'darwin': 'macos'
+        }.get(os, os)
+        return '-'.join([zig_arch, zig_os])
+    else:
+        return target
+
+
+def detect_zig_target():
+    target = os.getenv('CARGO_BUILD_TARGET')
+    if target is not None:
+        return zig_target_from(target, RUST)
+
+    goos = os.getenv('GOOS')
+    if goos is not None:
+        goarch = os.getenv('GOARCH')
+        return zig_target_from('{}-{}'.format(goarch, goos), GO)
+
+    return None
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s %(message)s')
+    program = sys.argv[0]
+    args = sys.argv[1:]
+    cmd = 'cc' if 'cc' in program else 'c++'
+    run_args = ['zig', cmd]
+
+    target = detect_zig_target();
+    if target is not None:
+        run_args += ['-target', target]
+    for arg in args:
+        if arg in BLACKLIST_ARGS:
+            continue
+        run_args.append(arg)
+
+    log(run_args)
+    try:
+        subprocess.run(run_args, check=True)
+    except subprocess.CalledProcessError as e:
+        log(f'Command {e.cmd} failed with error {e.returncode}')
+        sys.exit(e.returncode)
