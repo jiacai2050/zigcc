@@ -1,20 +1,33 @@
 * Zig-cc
-Use Zig to cross compile Go/Rust projects.
-#+begin_src bash :results verbatim :exports both
-uname -a
-zig version
-cargo version
+Scripts help you use Zig to cross compile Go/Rust projects.
+* Why this
+In most cases, we can use following command to use Zig for compile
+#+begin_src bash
+CC='zig cc' CXX='zig c++' ...
+#+end_src
+However in real world, there are many issues this way, such as:
+- [[https://github.com/ziglang/zig/issues/4911][zig cc: parse -target and -mcpu/-march/-mtune flags according to clang #4911]]
+- [[https://gist.github.com/kassane/446889ea1dd5ff07048d921f2b755e78][Targets compare: Rust to Zig]]
+- [[https://github.com/search?q=repo%3Aziglang%2Fzig+unsupported+linker+arg%3A&type=issues][unsupported linker arg]]
+So this project was born, it will
+- Convert target between Zig and Rust/Go
+- Ignore link args when =zig cc= throw errors, hopefully this will make compile successfully.
+* Install
+Download [[file:zigcc][zigcc]] file, give it executable permission, and create a soft link =zigcxx= to it.
+#+begin_src bash
+curl -Lo zigcc https://github.com/jiacai2050/zig-cc/raw/main/zigcc
+chmod +x zigcc
+ln -s zigcc zigcxx
 #+end_src
 
-#+RESULTS:
-: Darwin mario 23.2.0 Darwin Kernel Version 23.2.0: Wed Nov 15 21:55:06 PST 2023; root:xnu-10002.61.3~2/RELEASE_ARM64_T6020 arm64
-: 0.12.0-dev.2307+1b8f7e46f
-: cargo 1.70.0 (ec8a8a0ca 2023-04-25)
+Then use like before
+#+begin_src bash
+CC=zigcc CXX=zigcxx ...
+#+end_src
 
-** Config
+When compile Rust project, linker should be set in =.cargo/config=, like
 #+begin_src conf
 # cat ~/.cargo/config
-
 [target.x86_64-unknown-linux-musl]
 linker = "zigcc"
 
