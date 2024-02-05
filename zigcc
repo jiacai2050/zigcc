@@ -21,7 +21,7 @@ def zig_target_from(target, lang):
         # i686-pc-windows-msvc --> i386-windows-gnu
         [arch, vendor, os, abi] = target.split('-')
         zig_arch = {
-            'i686': 'i386',
+            'i686': 'x86',
         }.get(arch, arch)
         return '-'.join([zig_arch, os, abi])
     elif lang == GO:

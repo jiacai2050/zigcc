@@ -5,24 +5,22 @@ on:
   schedule:
     - cron: '10 20 * * *'
   pull_request:
-    paths:
-      - 'cross-compile/**'
-      - '**.yml'
+    paths-ignore:
+      - 'README**'
   push:
     branches:
       - main
       - master
-    paths:
-      - 'cross-compile/**'
-      - '**.yml'
-
-# Allow one concurrent deployment
-concurrency:
-  group: "cross-compile"
-  cancel-in-progress: true
+    paths-ignore:
+      - 'README**'
 
 env:
   OUTPUT: /tmp/cc.md
+
+# Allow one concurrent deployment
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
 
 jobs:
   go:
@@ -30,7 +28,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        working-directory: cross-compile
+        working-directory: .
     strategy:
       fail-fast: false
       matrix:
@@ -78,7 +76,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        working-directory: cross-compile
+        working-directory: .
     strategy:
       fail-fast: false
       matrix:
