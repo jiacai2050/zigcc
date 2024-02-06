@@ -28,7 +28,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        working-directory: .
+        working-directory: tests
     strategy:
       fail-fast: false
       matrix:
@@ -76,7 +76,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        working-directory: .
+        working-directory: tests
     strategy:
       fail-fast: false
       matrix:

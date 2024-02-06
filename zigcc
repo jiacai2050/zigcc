@@ -1,5 +1,18 @@
 #!/usr/bin/env python3
 
+# A util script that aims to ease use `zig cc` to compile C/C++/Rust/Go programs.
+#
+# How it works:
+# This script will infer which command to run based on `sys.argv[0]`, which is
+# the program name, currently it supports:
+# 1. zigcc, invoke `zig cc`
+# 2. zigcxx, invoke `zig c++`
+# 3. zigcargo, invoke `cargo` with `CC`, `CXX`, and rustc linker set to zig.
+#
+# Supported env vars:
+# 1. `ZIGCC_LOG`, enable log
+# 2. `ZIGCC_FLAGS`, extra flags passed to zig, such as `-fno-sanitize=undefined`
+
 import sys, os
 import logging
 import subprocess
@@ -9,7 +22,7 @@ RUST = 1
 GO = 2
 
 # Update this if zig cc doesn't support specific args.
-BLACKLIST_ARGS = ['--target=', '-no_pie']
+BLACKLIST_ARGS = ['-no_pie']
 
 def log(msg, *args, **kwargs):
     if os.getenv('ZIGCC_LOG', '0') in ['true', '1']:
@@ -18,7 +31,7 @@ def log(msg, *args, **kwargs):
 def zig_target_from(target, lang):
     if lang == RUST:
         # Zig target has no vendor field
-        # i686-pc-windows-msvc --> i386-windows-gnu
+        # i686-pc-windows-msvc --> x86-windows-msvc
         [arch, vendor, os, abi] = target.split('-')
         zig_arch = {
             'i686': 'x86',
@@ -39,6 +52,7 @@ def zig_target_from(target, lang):
         return target
 
 
+# Detect zig target from language specific vars.
 def detect_zig_target():
     target = os.getenv('CARGO_BUILD_TARGET')
     if target is not None:
@@ -51,25 +65,85 @@ def detect_zig_target():
 
     return None
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s %(message)s')
-    program = sys.argv[0]
-    args = sys.argv[1:]
-    cmd = 'cc' if 'cc' in program else 'c++'
-    run_args = ['zig', cmd]
 
-    target = detect_zig_target();
-    if target is not None:
-        run_args += ['-target', target]
+def cargo_linker_var_name(target):
+    return 'CARGO_TARGET_{}_LINKER'.format(target.replace('-', '_').upper())
+
+def guess_rust_target(args):
+    found_target = False
     for arg in args:
-        if arg in BLACKLIST_ARGS:
+        if arg == '--target':
+            found_target = True
             continue
-        run_args.append(arg)
+        if found_target:
+            return arg
 
-    log(run_args)
+    target = os.getenv('CARGO_BUILD_TARGET')
+    if target is not None:
+        return target
+
     try:
-        subprocess.run(run_args, check=True)
+        stdout = subprocess.check_output(['rustc', '-Vv']).decode('utf8')
+        for line in stdout.split('\n'):
+            kv = line.split(':', 2)
+            if len(kv) > 1:
+                [key, value] = kv
+                if key == 'host':
+                    return value.strip()
+    except Exception as e:
+        log('Get rustc triple failed, err:{}', e)
+        raise e
+
+def run_subprocess(args, env):
+    log(args)
+    log(env)
+    try:
+        subprocess.run(args,
+                       check=True,
+                       env=env)
     except subprocess.CalledProcessError as e:
         log(f'Command {e.cmd} failed with error {e.returncode}')
         sys.exit(e.returncode)
+
+def run_as_cargo(args):
+    target = guess_rust_target(args)
+    env = os.environ.copy()
+    env[cargo_linker_var_name(target)] = 'zigcc'
+    env['CC'] = 'zigcc'
+    env['CXX'] = 'zigcxx'
+    run_subprocess(['cargo'] + args, env)
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s %(message)s')
+    program = os.path.basename(sys.argv[0])
+    args = sys.argv[1:]
+    if program == 'zigcargo':
+        run_as_cargo(args)
+        sys.exit(0)
+
+    run_args = {
+        'zigcc': ['zig', 'cc'],
+        'zigcxx': ['zig', 'c++'],
+    }.get(program)
+    if run_args is None:
+        print(f"Unknown program, {program}")
+        sys.exit(1)
+
+    target = detect_zig_target()
+    if target is not None:
+        run_args += ['-target', target]
+
+    for arg in args:
+        if arg in BLACKLIST_ARGS:
+            continue
+        if '--target=' in arg:
+            continue
+        run_args.append(arg)
+
+    flags = os.getenv('ZIGCC_FLAGS')
+    if flags is not None:
+        for flag in flags.split(' '):
+            run_args.append(flag)
+
+    run_subprocess(run_args, os.environ)

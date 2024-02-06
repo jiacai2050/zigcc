@@ -1,6 +1,7 @@
 * Zig-cc
-Scripts help you use Zig to cross compile Go/Rust projects.
-* Why this
+A util script that aims to ease use =zig cc= to compile C/C++/Rust/Go programs.
+
+* Why
 In most cases, we can use following command to use Zig for compile
 #+begin_src bash
 CC='zig cc' CXX='zig c++' ...
@@ -13,11 +14,12 @@ So this project was born, it will
 - Convert target between Zig and Rust/Go
 - Ignore link args when =zig cc= throw errors, hopefully this will make compile successfully.
 * Install
-Download [[file:zigcc][zigcc]] file, give it executable permission, and create a soft link =zigcxx= to it.
+Download [[file:zigcc][zigcc]] file, give it executable permission, and create two soft links =zigcxx=, =zigcargo= to it.
 #+begin_src bash
 curl -Lo zigcc https://github.com/jiacai2050/zig-cc/raw/main/zigcc
 chmod +x zigcc
 ln -s zigcc zigcxx
+ln -s zigcc zigcargo
 #+end_src
 
 Then use like before
@@ -25,12 +27,4 @@ Then use like before
 CC=zigcc CXX=zigcxx ...
 #+end_src
 
-When compile Rust project, linker should be set in =.cargo/config=, like
-#+begin_src conf
-# cat ~/.cargo/config
-[target.x86_64-unknown-linux-musl]
-linker = "zigcc"
-
-[target.x86_64-unknown-linux-gnu]
-linker = "zigcc"
-#+end_src
+=zigcargo= can used to replace =cargo=, it will automatically set =CC= =CXX= =CARGO_TARGET_<triple>_LINKER= to =zigcc= or =zigcxx=.
