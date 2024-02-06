@@ -40,7 +40,7 @@ jobs:
         with:
           version: master
       - name: Install Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version: 'stable'
       - name: Prepare
