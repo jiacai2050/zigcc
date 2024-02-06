@@ -104,6 +104,8 @@ jobs:
           cargo install cargo-zigbuild
           echo "| Target | Project | Build | Status |" >> $OUTPUT
           echo "|:-:|:-:|:-:|:-:|" >> $OUTPUT
+          # Add zigcc to PATH
+          echo "$(cd ..; pwd)" >> $GITHUB_PATH
       - run: |
           ./run-rust.sh aarch64-unknown-linux-gnu
       - run: |

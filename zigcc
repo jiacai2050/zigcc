@@ -22,7 +22,13 @@ RUST = 1
 GO = 2
 
 # Update this if zig cc doesn't support specific args.
+# Exact match
 BLACKLIST_ARGS = ['-no_pie']
+# Wild match
+BLACKLIST_WILD_ARGS = ['--target',
+                       # '-exported_symbols_list',
+                       # '-dylib'
+                       ]
 
 def log(msg, *args, **kwargs):
     if os.getenv('ZIGCC_LOG', '0') in ['true', '1']:
@@ -96,7 +102,6 @@ def guess_rust_target(args):
 
 def run_subprocess(args, env):
     log(args)
-    log(env)
     try:
         subprocess.run(args,
                        check=True,
@@ -137,8 +142,16 @@ if __name__ == '__main__':
     for arg in args:
         if arg in BLACKLIST_ARGS:
             continue
-        if '--target=' in arg:
+
+        found = False
+        for wild_args in BLACKLIST_WILD_ARGS:
+            if wild_args in arg:
+                found = True
+                break
+
+        if found:
             continue
+
         run_args.append(arg)
 
     flags = os.getenv('ZIGCC_FLAGS')

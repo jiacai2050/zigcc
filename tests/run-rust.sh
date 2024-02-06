@@ -17,27 +17,17 @@ ROOT_DIR="$(cd `dirname $0`; pwd)"
 OUTPUT="${OUTPUT:-/tmp/cross-compile.out}"
 
 export CARGO_BUILD_TARGET="${1:-aarch64-unknown-linux-gnu}"
-export CC=${ROOT_DIR}/zigcc
-export CXX=${ROOT_DIR}/zigcxx
-
-function gen_conf() {
-  mkdir -p .cargo
-  echo "[target.$CARGO_BUILD_TARGET]" > .cargo/config
-  echo "linker = \"${CC}\"" >> .cargo/config
-}
 
 echo "Running ${CARGO_BUILD_TARGET}.................."
-
 rustup target add "${CARGO_BUILD_TARGET}"
-gen_conf "${CARGO_BUILD_TARGET}"
 
 function run() {
   MODE="$1"
   PROJECT=$(basename `pwd`)
   cargo clean
 
-  if [[ "$MODE" == "zigcc" ]]; then
-    cargo build
+  if [[ "$MODE" == "zigcargo" ]]; then
+    zigcargo build
   else
     cargo zigbuild --target ${CARGO_BUILD_TARGET}
   fi
@@ -52,6 +42,6 @@ function run() {
 PROJECT=( "hello-world" "reqwest" "rocksdb" )
 for DIR in "${PROJECT[@]}"; do
   cd ${ROOT_DIR}/${DIR}
-  run zigcc
+  run zigcargo
   run zigbuild
 done
