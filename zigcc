@@ -31,7 +31,8 @@ BLACKLIST_WILD_ARGS = ['--target',
                        ]
 
 def log(msg, *args, **kwargs):
-    if os.getenv('ZIGCC_LOG', '0') in ['true', '1']:
+    log_value = os.getenv('ZIGCC_LOG')
+    if log_value is not None and log_value in ['true', '1']:
         logging.info(msg, *args, **kwargs)
 
 def zig_target_from(target, lang):
@@ -139,6 +140,11 @@ if __name__ == '__main__':
     if target is not None:
         run_args += ['-target', target]
 
+    flags = os.getenv('ZIGCC_FLAGS')
+    if flags is not None:
+        for flag in flags.split(' '):
+            run_args.append(flag)
+
     for arg in args:
         if arg in BLACKLIST_ARGS:
             continue
@@ -153,10 +159,5 @@ if __name__ == '__main__':
             continue
 
         run_args.append(arg)
-
-    flags = os.getenv('ZIGCC_FLAGS')
-    if flags is not None:
-        for flag in flags.split(' '):
-            run_args.append(flag)
 
     run_subprocess(run_args, os.environ)
