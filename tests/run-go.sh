@@ -6,8 +6,8 @@ OUTPUT="${OUTPUT:-/tmp/cross-compile.out}"
 
 set -x
 export CGO_ENABLED=1
-export CC="${ROOT_DIR}/zigcc"
-export CXX="${ROOT_DIR}/zigcxx"
+export CC="zigcc"
+export CXX="zigcxx"
 
 cd "${ROOT_DIR}/go-demo" && go build -ldflags="-v"
 

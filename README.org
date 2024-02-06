@@ -12,7 +12,7 @@ However in real world, there are many issues this way, such as:
 - [[https://github.com/search?q=repo%3Aziglang%2Fzig+unsupported+linker+arg%3A&type=issues][unsupported linker arg]]
 So this project was born, it will
 - Convert target between Zig and Rust/Go
-- Ignore link args when =zig cc= throw errors, hopefully this will make compile successfully.
+- Ignore link args when =zig cc= throw errors, hopefully this will make compile successfully, WIP.
 * Install
 Download [[file:zigcc][zigcc]] file, give it executable permission, and create two soft links =zigcxx=, =zigcargo= to it.
 #+begin_src bash
@@ -22,9 +22,11 @@ ln -s zigcc zigcxx
 ln -s zigcc zigcargo
 #+end_src
 
-Then use like before
+Then use like this
 #+begin_src bash
 CC=zigcc CXX=zigcxx ...
 #+end_src
 
-=zigcargo= can used to replace =cargo=, it will automatically set =CC= =CXX= =CARGO_TARGET_<triple>_LINKER= to =zigcc= or =zigcxx=.
+=zigcargo= can used to replace =cargo=, it will automatically set
+- =CC= =CARGO_TARGET_<triple>_LINKER= to =zigcc=
+- =CXX= to =zigcxx=

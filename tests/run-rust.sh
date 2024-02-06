@@ -41,6 +41,7 @@ function run() {
 
 PROJECT=( "hello-world" "reqwest" "rocksdb" )
 for DIR in "${PROJECT[@]}"; do
+  echo "Run ${DIR}..."
   cd ${ROOT_DIR}/${DIR}
   run zigcargo
   run zigbuild
