@@ -39,11 +39,23 @@ def zig_target_from(target, lang):
     if lang == RUST:
         # Zig target has no vendor field
         # i686-pc-windows-msvc --> x86-windows-msvc
-        [arch, vendor, os, abi] = target.split('-')
+        triple = target.split('-')
+        if len(triple) == 4:
+            [arch, vendor, os, abi] = triple
+        # aarch64-apple-darwin
+        elif len(triple) == 3:
+            [arch, vendor, os] = triple
+            abi = 'none'
+        else:
+            return target
+
         zig_arch = {
             'i686': 'x86',
         }.get(arch, arch)
-        return '-'.join([zig_arch, os, abi])
+        zig_os = {
+            'darwin': 'macos'
+        }.get(os, os)
+        return '-'.join([zig_arch, zig_os, abi])
     elif lang == GO:
         [arch, os] = target.split('-', 2)
         zig_arch = {
