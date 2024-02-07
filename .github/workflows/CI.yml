@@ -1,12 +1,9 @@
-name: cross-compile
+name: CI
 
 on:
   workflow_dispatch:
   schedule:
     - cron: '10 20 * * *'
-  pull_request:
-    paths-ignore:
-      - 'README**'
   push:
     branches:
       - main
@@ -16,6 +13,7 @@ on:
 
 env:
   OUTPUT: /tmp/cc.md
+  ZIGCC_LOG: 1
 
 # Allow one concurrent deployment
 concurrency:
@@ -98,10 +96,7 @@ jobs:
         with:
           version: master
       - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
+        uses: dtolnay/rust-toolchain@stable
       - name: Prepare
         run: |
           cargo install cargo-zigbuild

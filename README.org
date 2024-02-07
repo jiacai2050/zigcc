@@ -1,4 +1,6 @@
 * Zig-cc
+[[https://github.com/jiacai2050/zig-cc/actions/workflows/CI.yml][https://github.com/jiacai2050/zig-cc/actions/workflows/CI.yml/badge.svg]]
+
 A util script that aims to ease use =zig cc= to compile C/C++/Rust/Go programs.
 
 * Why

@@ -20,10 +20,11 @@ import subprocess
 UNKNOWN = 0
 RUST = 1
 GO = 2
+ENABLE_LOG = os.getenv('ZIGCC_LOG') in ['true', '1']
 
 # Update this if zig cc doesn't support specific args.
 # Exact match
-BLACKLIST_ARGS = ['-no_pie']
+BLACKLIST_ARGS = ['-no_pie', '-Wl,-no_pie']
 # Wild match
 BLACKLIST_WILD_ARGS = ['--target',
                        # '-exported_symbols_list',
@@ -31,8 +32,7 @@ BLACKLIST_WILD_ARGS = ['--target',
                        ]
 
 def log(msg, *args, **kwargs):
-    log_value = os.getenv('ZIGCC_LOG')
-    if log_value is not None and log_value in ['true', '1']:
+    if ENABLE_LOG:
         logging.info(msg, *args, **kwargs)
 
 def zig_target_from(target, lang):
