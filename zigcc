@@ -102,7 +102,7 @@ def guess_rust_target(args):
         raise e
 
 def run_subprocess(args, env):
-    log(args)
+    log('Begin run command\nArgs:%s\nEnv:%s', args, env)
     try:
         subprocess.run(args,
                        check=True,
