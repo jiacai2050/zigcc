@@ -12,6 +12,7 @@ However in real world, there are many issues this way, such as:
 - [[https://github.com/ziglang/zig/issues/4911][zig cc: parse -target and -mcpu/-march/-mtune flags according to clang #4911]]
 - [[https://gist.github.com/kassane/446889ea1dd5ff07048d921f2b755e78][Targets compare: Rust to Zig]]
 - [[https://github.com/search?q=repo%3Aziglang%2Fzig+unsupported+linker+arg%3A&type=issues][unsupported linker arg]]
+- [[https://www.reddit.com/r/rust/comments/q866qx/rust_zig_cc_crt_conflict/][Rust + `zig cc` CRT conflict. : rust]]
 So this project was born, it will
 - Convert target between Zig and Rust/Go
 - Ignore link args when =zig cc= throw errors, hopefully this will make compile successfully, WIP.
@@ -32,3 +33,12 @@ CC=zigcc CXX=zigcxx ...
 =zigcargo= can used to replace =cargo=, it will automatically set
 - =CC= =CARGO_TARGET_<triple>_LINKER= to =zigcc=
 - =CXX= to =zigcxx=
+
+* Use in GitHub Action
+Adding a step to your workflow like this:
+#+begin_src yaml
+    - uses: jiacai2050/zigcc@v1
+      with:
+        zig-version: master
+#+end_src
+Then you can invoke =zigcc= =zigcxx= =zigcargo= in following steps.
