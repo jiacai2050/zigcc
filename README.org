@@ -42,3 +42,12 @@ Adding a step to your workflow like this:
         zig-version: master
 #+end_src
 Then you can invoke =zigcc= =zigcxx= =zigcargo= in following steps.
+
+* Config
+There some are env variable to config zigcc:
+- =ZIGCC_FLAGS=, space separated flags, pass to zig cc. An example is set this to =-fno-sanitize=undefined= to disable sanitize since they may break your programs. See [[https://nathancraddock.com/blog/zig-cc-undefined-behavior/][Catching undefined behavior with zig cc]]
+- =ZIGCC_BLACKLIST_FLAGS=, space separated flags, used to filter flags =zig cc= don't support, such as =-Wl,-dylib= otherwise you could see errors below
+  #+begin_src bash
+  = note: error: unsupported linker arg: -dylib
+  #+end_src
+- =ZIGCC_LOG= Set to =1= enable verbose logs.

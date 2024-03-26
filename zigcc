@@ -21,15 +21,14 @@ UNKNOWN = 0
 RUST = 1
 GO = 2
 ENABLE_LOG = os.getenv('ZIGCC_LOG') in ['true', '1']
+FLAGS = os.getenv('ZIGCC_FLAGS', '').split(' ')
+FLAGS = [f for f in FLAGS if f != '']
 
-# Update this if zig cc doesn't support specific args.
-# Exact match
-BLACKLIST_ARGS = ['-no_pie', '-Wl,-no_pie']
-# Wild match
-BLACKLIST_WILD_ARGS = ['--target',
-                       # '-exported_symbols_list',
-                       # '-dylib'
-                       ]
+# Blacklist flags, wild match
+BLACKLIST_WILD_FLAGS = os.getenv('ZIGCC_BLACKLIST_FLAGS', '').split(' ') + ['--target', '-exported_symbols_list',
+                                                                            '-no_pie', '-Wl,-dylib']
+BLACKLIST_WILD_FLAGS = [f for f in BLACKLIST_WILD_FLAGS if f != '']
+
 
 def log(msg, *args, **kwargs):
     if ENABLE_LOG:
@@ -152,17 +151,12 @@ if __name__ == '__main__':
     if target is not None:
         run_args += ['-target', target]
 
-    flags = os.getenv('ZIGCC_FLAGS')
-    if flags is not None:
-        for flag in flags.split(' '):
-            run_args.append(flag)
+    for flag in FLAGS:
+        run_args.append(flag)
 
     for arg in args:
-        if arg in BLACKLIST_ARGS:
-            continue
-
         found = False
-        for wild_args in BLACKLIST_WILD_ARGS:
+        for wild_args in BLACKLIST_WILD_FLAGS:
             if wild_args in arg:
                 found = True
                 break
