@@ -26,7 +26,11 @@ FLAGS = [f for f in FLAGS if f != '']
 
 # Blacklist flags, wild match
 BLACKLIST_WILD_FLAGS = os.getenv('ZIGCC_BLACKLIST_FLAGS', '').split(' ') + ['--target', '-exported_symbols_list',
-                                                                            '-no_pie', '-Wl,-dylib']
+                                                                            '-no_pie', '-Wl,-dylib',
+                                                                            # https://github.com/ziglang/zig/issues/5320
+                                                                            'self-contained/rcrt1.o',
+                                                                            'self-contained/crti.o',
+                                                                            ]
 BLACKLIST_WILD_FLAGS = [f for f in BLACKLIST_WILD_FLAGS if f != '']
 
 
