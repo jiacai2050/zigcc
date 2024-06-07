@@ -1,5 +1,8 @@
-* Zig-cc
-[[https://github.com/jiacai2050/zig-cc/actions/workflows/CI.yml][https://github.com/jiacai2050/zig-cc/actions/workflows/CI.yml/badge.svg]]
+* zigcc
+[[https://github.com/jiacai2050/zig-cc/actions/workflows/ci.yml][https://github.com/jiacai2050/zig-cc/actions/workflows/ci.yml/badge.svg]]
+[[https://github.com/jiacai2050/zig-cc/actions/workflows/zig.yml][https://github.com/jiacai2050/zig-cc/actions/workflows/zig.yml/badge.svg]]
+[[https://github.com/jiacai2050/zig-cc/actions/workflows/release.yml][https://github.com/jiacai2050/zig-cc/actions/workflows/release.yml/badge.svg]]
+[[https://pypi.org/project/zigcc][https://img.shields.io/pypi/v/zigcc]]
 
 A util script that aims to ease use =zig cc= to compile C/C++/Rust/Go programs.
 
@@ -17,27 +20,21 @@ So this project was born, it will
 - Convert target between Zig and Rust/Go
 - Ignore link args when =zig cc= throw errors, hopefully this will make compile successfully, WIP.
 * Install
-Download [[file:zigcc][zigcc]] file, give it executable permission, and create two soft links =zigcxx=, =zigcargo= to it.
 #+begin_src bash
-curl -Lo zigcc https://github.com/jiacai2050/zig-cc/raw/main/zigcc
-chmod +x zigcc
-ln -s zigcc zigcxx
-ln -s zigcc zigcargo
+pip install -U zigcc
 #+end_src
 
-Then use like this
-#+begin_src bash
-CC=zigcc CXX=zigcxx ...
-#+end_src
-
-=zigcargo= can used to replace =cargo=, it will automatically set
-- =CC= =CARGO_TARGET_<triple>_LINKER= to =zigcc=
-- =CXX= to =zigcxx=
+This will install three executables:
+- =zigcc=, used for =CC=
+- =zigcxx=, used for =CXX=
+- =zigcargo= can used to replace =cargo=, it will automatically set
+  - =CC= =CARGO_TARGET_<triple>_LINKER= to =zigcc=
+  - =CXX= to =zigcxx=
 
 * Use in GitHub Action
 Adding a step to your workflow like this:
 #+begin_src yaml
-    - uses: jiacai2050/zigcc@v1
+    - uses: jiacai2050/zigcc@main
       with:
         zig-version: master
 #+end_src
@@ -50,4 +47,4 @@ There some are env variable to config zigcc:
   #+begin_src bash
   = note: error: unsupported linker arg: -dylib
   #+end_src
-- =ZIGCC_LOG= Set to =1= enable verbose logs.
+- =ZIGCC_VERBOSE= Set to =1= enable verbose logs.

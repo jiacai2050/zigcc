@@ -1,2 +1,4 @@
 target
 cgo-demo
+dist
+README.md

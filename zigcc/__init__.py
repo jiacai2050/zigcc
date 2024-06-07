@@ -10,33 +10,42 @@
 # 3. zigcargo, invoke `cargo` with `CC`, `CXX`, and rustc linker set to zig.
 #
 # Supported env vars:
-# 1. `ZIGCC_LOG`, enable log
+# 1. `ZIGCC_VERBOSE`, enable verbose log
 # 2. `ZIGCC_FLAGS`, extra flags passed to zig, such as `-fno-sanitize=undefined`
 
-import sys, os
+import sys
+import os
 import logging
 import subprocess
+import platform
+
+__VERSION__ = '0.1.0'
 
 UNKNOWN = 0
 RUST = 1
 GO = 2
-ENABLE_LOG = os.getenv('ZIGCC_LOG') in ['true', '1']
+IS_MACOS = platform.system() == 'Darwin'
+ENABLE_LOG = os.getenv('ZIGCC_VERBOSE', '0') == '1'
 FLAGS = os.getenv('ZIGCC_FLAGS', '').split(' ')
 FLAGS = [f for f in FLAGS if f != '']
 
 # Blacklist flags, wild match
-BLACKLIST_WILD_FLAGS = os.getenv('ZIGCC_BLACKLIST_FLAGS', '').split(' ') + ['--target', '-exported_symbols_list',
-                                                                            '-no_pie', '-Wl,-dylib',
-                                                                            # https://github.com/ziglang/zig/issues/5320
-                                                                            'self-contained/rcrt1.o',
-                                                                            'self-contained/crti.o',
-                                                                            ]
+BLACKLIST_WILD_FLAGS = os.getenv('ZIGCC_BLACKLIST_FLAGS', '').split(' ') + [
+    '--target',
+    '-exported_symbols_list',
+    '-no_pie',
+    '-Wl,-dylib',
+    # https://github.com/ziglang/zig/issues/5320
+    'self-contained/rcrt1.o',
+    'self-contained/crti.o',
+]
 BLACKLIST_WILD_FLAGS = [f for f in BLACKLIST_WILD_FLAGS if f != '']
 
 
 def log(msg, *args, **kwargs):
     if ENABLE_LOG:
         logging.info(msg, *args, **kwargs)
+
 
 def zig_target_from(target, lang):
     if lang == RUST:
@@ -55,20 +64,16 @@ def zig_target_from(target, lang):
         zig_arch = {
             'i686': 'x86',
         }.get(arch, arch)
-        zig_os = {
-            'darwin': 'macos'
-        }.get(os, os)
+        zig_os = {'darwin': 'macos'}.get(os, os)
         return '-'.join([zig_arch, zig_os, abi])
     elif lang == GO:
         [arch, os] = target.split('-', 2)
         zig_arch = {
-           "386": "x86",
-           "amd64": "x86_64",
-           "arm64": "aarch64",
+            '386': 'x86',
+            'amd64': 'x86_64',
+            'arm64': 'aarch64',
         }.get(arch, arch)
-        zig_os = {
-            'darwin': 'macos'
-        }.get(os, os)
+        zig_os = {'darwin': 'macos'}.get(os, os)
         return '-'.join([zig_arch, zig_os])
     else:
         return target
@@ -90,6 +95,7 @@ def detect_zig_target():
 
 def cargo_linker_var_name(target):
     return 'CARGO_TARGET_{}_LINKER'.format(target.replace('-', '_').upper())
+
 
 def guess_rust_target(args):
     found_target = False
@@ -116,15 +122,15 @@ def guess_rust_target(args):
         log('Get rustc triple failed, err:{}', e)
         raise e
 
+
 def run_subprocess(args, env):
     log('Begin run command\nArgs:%s\nEnv:%s', args, env)
     try:
-        subprocess.run(args,
-                       check=True,
-                       env=env)
+        subprocess.run(args, check=True, env=env)
     except subprocess.CalledProcessError as e:
         log(f'Command {e.cmd} failed with error {e.returncode}')
         sys.exit(e.returncode)
+
 
 def run_as_cargo(args):
     target = guess_rust_target(args)
@@ -134,9 +140,9 @@ def run_as_cargo(args):
     env['CXX'] = 'zigcxx'
     run_subprocess(['cargo'] + args, env)
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s %(message)s')
+
+def main():
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
     program = os.path.basename(sys.argv[0])
     args = sys.argv[1:]
     if program == 'zigcargo':
@@ -148,7 +154,7 @@ if __name__ == '__main__':
         'zigcxx': ['zig', 'c++'],
     }.get(program)
     if run_args is None:
-        print(f"Unknown program, {program}")
+        print(f'Unknown program, {program}')
         sys.exit(1)
 
     target = detect_zig_target()
@@ -157,6 +163,12 @@ if __name__ == '__main__':
 
     for flag in FLAGS:
         run_args.append(flag)
+
+    # https://github.com/ziglang/zig/issues/10299#issuecomment-989736808
+    # Append $(xcrun --show-sdk-path)/System/Library/Frameworks in search path
+    if IS_MACOS:
+        root_path = subprocess.getoutput('xcrun --show-sdk-path')
+        run_args += [f'-F{root_path}/System/Library/Frameworks']
 
     for arg in args:
         found = False
@@ -171,3 +183,7 @@ if __name__ == '__main__':
         run_args.append(arg)
 
     run_subprocess(run_args, os.environ)
+
+
+if __name__ == '__main__':
+    main()

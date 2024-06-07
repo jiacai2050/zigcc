@@ -19,5 +19,11 @@ runs:
       with:
         version: ${{ inputs.zig-version }}
     - name: Set GitHub Path
-      run: echo "${GITHUB_WORKSPACE}/.jiacai2050-zigcc" >> $GITHUB_PATH
+      run: |
+        export ZIGCC_HOME="${GITHUB_WORKSPACE}/.jiacai2050-zigcc"
+        mkdir "${ZIGCC_HOME}/bin"
+        echo "${ZIGCC_HOME}/bin" >> $GITHUB_PATH
+        cp "${ZIGCC_HOME}/zigcc/__init__.py" "${ZIGCC_HOME}/bin/zigcc"
+        ln -s "${ZIGCC_HOME}/bin/zigcc" "${ZIGCC_HOME}/bin/zigcxx"
+        ln -s "${ZIGCC_HOME}/bin/zigcc" "${ZIGCC_HOME}/bin/zigcargo"
       shell: bash
