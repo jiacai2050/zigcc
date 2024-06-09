@@ -24,8 +24,8 @@ __VERSION__ = '0.1.0'
 UNKNOWN = 0
 RUST = 1
 GO = 2
-IS_MACOS = platform.system() == 'Darwin'
 ENABLE_LOG = os.getenv('ZIGCC_VERBOSE', '0') == '1'
+APPEND_SYSROOT = os.getenv('ZIGCC_APPEND_SYSROOT', '0') == '1'
 FLAGS = os.getenv('ZIGCC_FLAGS', '').split(' ')
 FLAGS = [f for f in FLAGS if f != '']
 
@@ -38,6 +38,7 @@ BLACKLIST_WILD_FLAGS = os.getenv('ZIGCC_BLACKLIST_FLAGS', '').split(' ') + [
     # https://github.com/ziglang/zig/issues/5320
     'self-contained/rcrt1.o',
     'self-contained/crti.o',
+    '-x'
 ]
 BLACKLIST_WILD_FLAGS = [f for f in BLACKLIST_WILD_FLAGS if f != '']
 
@@ -88,7 +89,10 @@ def detect_zig_target():
     goos = os.getenv('GOOS')
     if goos is not None:
         goarch = os.getenv('GOARCH')
-        return zig_target_from('{}-{}'.format(goarch, goos), GO)
+        guess =  zig_target_from('{}-{}'.format(goarch, goos), GO)
+        host = zig_target_from('{}-{}'.format(os.getenv('GOHOSTARCH'), os.getenv('GOHOSTOS')), GO)
+        # Ignore target when it's the same as the host
+        return None if guess == host else guess
 
     return None
 
@@ -164,12 +168,6 @@ def main():
     for flag in FLAGS:
         run_args.append(flag)
 
-    # https://github.com/ziglang/zig/issues/10299#issuecomment-989736808
-    # Append $(xcrun --show-sdk-path)/System/Library/Frameworks in search path
-    if IS_MACOS:
-        root_path = subprocess.getoutput('xcrun --show-sdk-path')
-        run_args += [f'-F{root_path}/System/Library/Frameworks']
-
     for arg in args:
         found = False
         for wild_args in BLACKLIST_WILD_FLAGS:
@@ -181,6 +179,16 @@ def main():
             continue
 
         run_args.append(arg)
+
+    if APPEND_SYSROOT:
+        root_path = subprocess.getoutput('xcrun --show-sdk-path')
+        # https://github.com/ziglang/zig/issues/10299#issuecomment-989736808
+        # https://github.com/ziglang/zig/issues/10790#issuecomment-1030712395
+        run_args += [f'--sysroot={root_path}',
+                     f'-F{root_path}/System/Library/Frameworks',
+                     f'-I/usr/include',
+                     f'-L/usr/lib',
+                     ]
 
     run_subprocess(run_args, os.environ)
 

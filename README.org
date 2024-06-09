@@ -37,7 +37,7 @@ Adding a step to your workflow like this:
       - name: Install ZigCC
         uses: jiacai2050/zigcc@main
         with:
-          version: master
+          zig-version: master
 #+end_src
 Then you can invoke =zigcc= =zigcxx= =zigcargo= in following steps.
 
