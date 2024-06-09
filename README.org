@@ -4,7 +4,7 @@
 [[https://github.com/jiacai2050/zig-cc/actions/workflows/release.yml][https://github.com/jiacai2050/zig-cc/actions/workflows/release.yml/badge.svg]]
 [[https://pypi.org/project/zigcc][https://img.shields.io/pypi/v/zigcc]]
 
-A util script that aims to ease use =zig cc= to compile C/C++/Rust/Go programs.
+A util script that aims to ease use ~zig cc~ to compile C/C++/Rust/Go programs.
 
 * Why
 In most cases, we can use following command to use Zig for compile
@@ -34,9 +34,10 @@ This will install three executables:
 * Use in GitHub Action
 Adding a step to your workflow like this:
 #+begin_src yaml
-    - uses: jiacai2050/zigcc@main
-      with:
-        zig-version: master
+      - name: Install ZigCC
+        uses: jiacai2050/zigcc@main
+        with:
+          version: master
 #+end_src
 Then you can invoke =zigcc= =zigcxx= =zigcargo= in following steps.
 

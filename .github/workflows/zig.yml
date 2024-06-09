@@ -33,8 +33,8 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
-      - name: Install Zig
-        uses: goto-bus-stop/setup-zig@v2
+      - name: Install ZigCC
+        uses: jiacai2050/zigcc@main
         with:
           version: master
       - name: Install Go
@@ -46,8 +46,6 @@ jobs:
         run: |
           echo "| GOOS | GOARCH | Status |" >> $OUTPUT
           echo "|:-:|:-:|:-:|" >> $OUTPUT
-          # Add zigcc to PATH
-          echo "$(cd ..; pwd)" >> $GITHUB_PATH
       - run: |
            GOOS=linux GOARCH=386 ./run-go.sh
       - run: |
@@ -91,8 +89,8 @@ jobs:
           path: |
             ~/.cargo
           key: rust-${{ runner.os }}
-      - name: Install Zig
-        uses: goto-bus-stop/setup-zig@v2
+      - name: Install ZigCC
+        uses: jiacai2050/zigcc@main
         with:
           version: master
       - name: Install Rust
@@ -102,8 +100,6 @@ jobs:
           cargo install cargo-zigbuild
           echo "| Target | Project | Build | Status |" >> $OUTPUT
           echo "|:-:|:-:|:-:|:-:|" >> $OUTPUT
-          # Add zigcc to PATH
-          echo "$(cd ..; pwd)" >> $GITHUB_PATH
       - run: |
           ./run-rust.sh aarch64-unknown-linux-gnu
       - run: |
