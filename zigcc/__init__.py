@@ -17,7 +17,6 @@ import sys
 import os
 import logging
 import subprocess
-import platform
 
 __VERSION__ = '0.1.0'
 
@@ -38,7 +37,7 @@ BLACKLIST_WILD_FLAGS = os.getenv('ZIGCC_BLACKLIST_FLAGS', '').split(' ') + [
     # https://github.com/ziglang/zig/issues/5320
     'self-contained/rcrt1.o',
     'self-contained/crti.o',
-    '-x'
+    '-x',
 ]
 BLACKLIST_WILD_FLAGS = [f for f in BLACKLIST_WILD_FLAGS if f != '']
 
@@ -89,8 +88,10 @@ def detect_zig_target():
     goos = os.getenv('GOOS')
     if goos is not None:
         goarch = os.getenv('GOARCH')
-        guess =  zig_target_from('{}-{}'.format(goarch, goos), GO)
-        host = zig_target_from('{}-{}'.format(os.getenv('GOHOSTARCH'), os.getenv('GOHOSTOS')), GO)
+        guess = zig_target_from('{}-{}'.format(goarch, goos), GO)
+        host = zig_target_from(
+            '{}-{}'.format(os.getenv('GOHOSTARCH'), os.getenv('GOHOSTOS')), GO
+        )
         # Ignore target when it's the same as the host
         return None if guess == host else guess
 
@@ -184,11 +185,12 @@ def main():
         root_path = subprocess.getoutput('xcrun --show-sdk-path')
         # https://github.com/ziglang/zig/issues/10299#issuecomment-989736808
         # https://github.com/ziglang/zig/issues/10790#issuecomment-1030712395
-        run_args += [f'--sysroot={root_path}',
-                     f'-F{root_path}/System/Library/Frameworks',
-                     f'-I/usr/include',
-                     f'-L/usr/lib',
-                     ]
+        run_args += [
+            f'--sysroot={root_path}',
+            f'-F{root_path}/System/Library/Frameworks',
+            '-I/usr/include',
+            '-L/usr/lib',
+        ]
 
     run_subprocess(run_args, os.environ)
 
