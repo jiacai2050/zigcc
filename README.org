@@ -2,9 +2,9 @@
 [[https://github.com/jiacai2050/zig-cc/actions/workflows/ci.yml][https://github.com/jiacai2050/zig-cc/actions/workflows/ci.yml/badge.svg]]
 [[https://github.com/jiacai2050/zig-cc/actions/workflows/zig.yml][https://github.com/jiacai2050/zig-cc/actions/workflows/zig.yml/badge.svg]]
 [[https://github.com/jiacai2050/zig-cc/actions/workflows/release.yml][https://github.com/jiacai2050/zig-cc/actions/workflows/release.yml/badge.svg]]
-[[https://pypi.org/project/zigcc][https://img.shields.io/pypi/v/zigcc]]
+[[https://pypi.org/project/zigcc][https://img.shields.io/pypi/v/zigcc.svg]]
 
-A util script that aims to ease use ~zig cc~ to compile C/C++/Rust/Go programs.
+Util scripts aimed at simplifying the use of =zig cc= for compiling C, C++, Rust, and Go programs.
 
 * Why
 In most cases, we can use following command to use Zig for compile
@@ -21,7 +21,7 @@ So this project was born, it will
 - Ignore link args when =zig cc= throw errors, hopefully this will make compile successfully, WIP.
 * Install
 #+begin_src bash
-pip install -U zigcc
+pip3 install -U zigcc
 #+end_src
 
 This will install three executables:
@@ -34,8 +34,8 @@ This will install three executables:
 * Use in GitHub Action
 Adding a step to your workflow like this:
 #+begin_src yaml
-      - name: Install ZigCC
-        uses: jiacai2050/zigcc@main
+      - name: Install zigcc
+        uses: jiacai2050/zigcc@v1
         with:
           zig-version: master
 #+end_src
@@ -46,6 +46,6 @@ There some are env variable to config zigcc:
 - =ZIGCC_FLAGS=, space separated flags, pass to zig cc. An example is set this to =-fno-sanitize=undefined= to disable sanitize since they may break your programs. See [[https://nathancraddock.com/blog/zig-cc-undefined-behavior/][Catching undefined behavior with zig cc]]
 - =ZIGCC_BLACKLIST_FLAGS=, space separated flags, used to filter flags =zig cc= don't support, such as =-Wl,-dylib= otherwise you could see errors below
   #+begin_src bash
-  = note: error: unsupported linker arg: -dylib
+  note: error: unsupported linker arg: -dylib
   #+end_src
 - =ZIGCC_VERBOSE= Set to =1= enable verbose logs.

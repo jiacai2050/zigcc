@@ -6,9 +6,9 @@ build-backend = "hatchling.build"
 name = "zigcc"
 dynamic = ["version"]
 authors = [{name = "Jiacai Liu", email="dev@liujiacai.net"}]
-description = "A util script that aims to ease use `zig cc` to compile C/C++/Rust/Go programs."
+description = "Util scripts aimed at simplifying the use of `zig cc` for compiling C, C++, Rust, and Go programs."
 readme = "README.md"
-keywords = ["zig", "compile", "rust", "cross-compile"]
+keywords = ["zig", "compile", "rust", "cross-compile", "go"]
 license = "GPL-3.0"
 requires-python = ">=3.0.0"
 dependencies = [
