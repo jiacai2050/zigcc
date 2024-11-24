@@ -14,5 +14,6 @@ lint:
 
 readme:
 	pandoc -f org -t markdown README.org -o README.md
+	sed -i 's/{.verbatim}//g' README.md
 
 .PHONY: build clean fix lint readme

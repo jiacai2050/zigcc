@@ -11,21 +11,24 @@
 #
 # Supported env vars:
 # 1. `ZIGCC_VERBOSE`, enable verbose log
-# 2. `ZIGCC_FLAGS`, extra flags passed to zig, such as `-fno-sanitize=undefined`
+# 2. `ZIGCC_FLAGS`, extra flags passed to zig
 
 import sys
 import os
 import logging
 import subprocess
 
-__VERSION__ = '1.0.0'
+__VERSION__ = '1.0.1'
 
 UNKNOWN = 0
 RUST = 1
 GO = 2
 ENABLE_LOG = os.getenv('ZIGCC_VERBOSE', '0') == '1'
+ENABLE_SANITIZE = os.getenv('ZIGCC_ENABLE_SANITIZE', '0') == '1'
 APPEND_SYSROOT = os.getenv('ZIGCC_APPEND_SYSROOT', '0') == '1'
-FLAGS = os.getenv('ZIGCC_FLAGS', '').split(' ')
+FLAGS = os.getenv(
+    'ZIGCC_FLAGS', '' if ENABLE_SANITIZE else '-fno-sanitize=undefined'
+).split(' ')
 FLAGS = [f for f in FLAGS if f != '']
 
 # Blacklist flags, wild match

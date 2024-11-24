@@ -43,7 +43,10 @@ Then you can invoke =zigcc= =zigcxx= =zigcargo= in following steps.
 
 * Config
 There some are env variable to config zigcc:
-- =ZIGCC_FLAGS=, space separated flags, pass to zig cc. An example is set this to =-fno-sanitize=undefined= to disable sanitize since they may break your programs. See [[https://nathancraddock.com/blog/zig-cc-undefined-behavior/][Catching undefined behavior with zig cc]]
+- =ZIGCC_FLAGS=, space separated flags, pass to zig cc.
+- =ZIGCC_ENABLE_SANITIZE= By default Zig will pass =-fsanitize=undefined -fsanitize-trap=undefined= to clang when compile without =-O2=, =-O3=, this causes Undefined Behavior to cause an Illegal Instruction, see [[https://nathancraddock.com/blog/zig-cc-undefined-behavior/][Catching undefined behavior with zig cc]].
+
+  So we disable it by default, set this variable to =1= to re-enable it.
 - =ZIGCC_BLACKLIST_FLAGS=, space separated flags, used to filter flags =zig cc= don't support, such as =-Wl,-dylib= otherwise you could see errors below
   #+begin_src bash
   note: error: unsupported linker arg: -dylib
